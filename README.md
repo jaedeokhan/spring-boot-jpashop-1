@@ -19,3 +19,24 @@ spring
     username: sa
     pas sword:
 ```
+
+### JPA와 DB 설정, 동작 확인
+
+JPA 쿼리 파라미터 남기기
+1. logging yml 사용
+
+```
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace# 파라미터 로깅
+```
+
+2. 외부 라이브러리 사용 - https://github.com/gavlyukovskiy
+P6Spy
+
+build.gralde에 추가
+```
+implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.6'
+```
+
