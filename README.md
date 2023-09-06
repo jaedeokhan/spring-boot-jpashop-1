@@ -22,8 +22,8 @@ spring
 
 ### JPA와 DB 설정, 동작 확인
 
-JPA 쿼리 파라미터 남기기
-1. logging yml 사용
+#### JPA 쿼리 파라미터 남기기
+##### 1. logging yml 사용
 
 ```
 logging:
@@ -32,8 +32,8 @@ logging:
     org.hibernate.type: trace# 파라미터 로깅
 ```
 
-2. 외부 라이브러리 사용 - https://github.com/gavlyukovskiy
-P6Spy
+##### 2. 외부 라이브러리 사용 - https://github.com/gavlyukovskiy
+- P6Spy
 
 build.gralde에 추가
 ```
@@ -120,3 +120,42 @@ private Address address;
 @Enumerated(EnumType.STRING)
 private DeliveryStatus status; // READY, COMP
 ```
+
+### 엔티티 클래스 개발2
+
+- 다대다 매핑(Cateogry - Category_Item - Item)
+
+#### Category
+
+
+```
+public class Category {
+'''
+    @ManyToMany
+    @JoinTable(name = "category_item",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "item_id")
+    )
+    private List<Item> items = new ArrayList<>();
+'''
+}
+```
+
+#### Item
+
+```
+public abstract class Item {
+'''
+    @ManyToMany(mappedBy = "items")
+    private List<Category> categories = new ArrayList<>();
+'''
+}
+```
+
+#### 실무에서 주의사항
+1. Setter 지양
+2. `@Id` id를 `@Column(name = "member_id")` 로 명확하게 지정
+3. 실무에서는 `@ManyToMany` 지양
+    1. 중간 테이블에는  값을 더 넣을수가 없다.
+4. Address는 불변한 값이기에 생성자로 생성하게 해주는게 좋다. protected로 기본 생성자를 만들어서 사람들이 막 new를 하지 못하게 안전하게 만들자.
+    1. JPA가 이런 제약을 두는 이유는 JPA 구현 라이브러리가 객체를 생성할 때 리플렉션 기능을 허용해야해서 기본 스펙으로 있다.
