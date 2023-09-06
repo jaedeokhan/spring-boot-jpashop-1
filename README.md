@@ -159,3 +159,95 @@ public abstract class Item {
     1. 중간 테이블에는  값을 더 넣을수가 없다.
 4. Address는 불변한 값이기에 생성자로 생성하게 해주는게 좋다. protected로 기본 생성자를 만들어서 사람들이 막 new를 하지 못하게 안전하게 만들자.
     1. JPA가 이런 제약을 두는 이유는 JPA 구현 라이브러리가 객체를 생성할 때 리플렉션 기능을 허용해야해서 기본 스펙으로 있다.
+
+### 엔티티 설계시 주의점
+
+1. 엔티티에는 가급적 Setter 사용하지 말자
+  - 변경 포인트가 많아서 유지보수가 어렵다.
+2. 모든 연관관계는 지연로딩으로 설정
+  - 즉시 로딩(EAGER)은 예측이 어렵고, 어떤 SQL이 실행될지 추적하기 어렵다. 특히 JPQL N+1 문제가 발생한다.
+  - @XToOne(OneToOne, ManyToOne) 관계는 기본이 즉시로딩이므로 직접 지연로딩으로 설정해야 한다.
+3. 컬렉션은 생성의 Best Pratice는 필드에서 바로 초기화하는 것
+  - null 문제에서 안전
+  - 하이버네이트는 엔티티 영속화 할 때, 컬렉션은 감싸서 하이버네이트가 제공하는 내장 컬렉션으로 변경한다.
+4. 테이블, 컬럼명 생성 전략
+  - Spring Boot에서는 SpringPhysicalNamingStrategy 사용
+    - 카멜 -> 언더 스코어
+
+#### CasCadeType.ALL을 통한 영속 전파로 일괄 등록
+주문(Order)을 하나 등록하면 주문아이템(OrderItem) 3개가 있을 때 CasCadeType.ALL로 설정을 하면
+Order만 등록을 하면 OrderItem 3개를 영속 전파로 자동 등록을 해준다.
+
+```
+package jpabook.jpashop.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static javax.persistence.FetchType.*;
+
+@Entity
+@Table(name = "orders")
+@Getter @Setter
+public class Order {
+...
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL) // 영속을 전파해서 ALL로 하면 order만 저장해도 orderItem 저장
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL) // Order만 저장해도 영속 전파해서 Devliery 자동 저장
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
+...
+}
+
+```
+
+#### 연관관계 편의 메서드
+객체 동기화를 해주기 위한 편의 메서드
+
+현재 회원과 주문은 양방향 관계를 가지고 있다.
+양방향 관계를 가지고 있으면 member에서 주문 리스트를 추가하고, order에서 회원을 추가해야 하는 2가지 동작이 있다.
+편하게 사용하기 위해서 외래키를 가지고 있는 테이블에서 동기화 하는 편의 메서드를 생성한다.
+
+```
+package jpabook.jpashop.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static javax.persistence.FetchType.*;
+
+@Entity
+@Table(name = "orders")
+@Getter @Setter
+public class Order {
+...
+    //== 연관관계 편의 메서드==//
+    public void setMember(Member member) {
+        this.member = member;
+        member.getOrders().add(this);
+    }
+
+    public void addOrderItem(OrderItem orderItem) {
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
+
+    public void setDelivery(Delivery delivery) {
+        this.delivery = delivery;
+        delivery.setOrder(this);
+    }
+
+}
+
+```
