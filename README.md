@@ -163,16 +163,16 @@ public abstract class Item {
 ### 엔티티 설계시 주의점
 
 1. 엔티티에는 가급적 Setter 사용하지 말자
-  - 변경 포인트가 많아서 유지보수가 어렵다.
+    - 변경 포인트가 많아서 유지보수가 어렵다.
 2. 모든 연관관계는 지연로딩으로 설정
-  - 즉시 로딩(EAGER)은 예측이 어렵고, 어떤 SQL이 실행될지 추적하기 어렵다. 특히 JPQL N+1 문제가 발생한다.
-  - @XToOne(OneToOne, ManyToOne) 관계는 기본이 즉시로딩이므로 직접 지연로딩으로 설정해야 한다.
+    - 즉시 로딩(EAGER)은 예측이 어렵고, 어떤 SQL이 실행될지 추적하기 어렵다. 특히 JPQL N+1 문제가 발생한다.
+    - @XToOne(OneToOne, ManyToOne) 관계는 기본이 즉시로딩이므로 직접 지연로딩으로 설정해야 한다.
 3. 컬렉션은 생성의 Best Pratice는 필드에서 바로 초기화하는 것
-  - null 문제에서 안전
-  - 하이버네이트는 엔티티 영속화 할 때, 컬렉션은 감싸서 하이버네이트가 제공하는 내장 컬렉션으로 변경한다.
+    - null 문제에서 안전
+    - 하이버네이트는 엔티티 영속화 할 때, 컬렉션은 감싸서 하이버네이트가 제공하는 내장 컬렉션으로 변경한다.
 4. 테이블, 컬럼명 생성 전략
-  - Spring Boot에서는 SpringPhysicalNamingStrategy 사용
-    - 카멜 -> 언더 스코어
+    - Spring Boot에서는 SpringPhysicalNamingStrategy 사용
+      - 카멜 -> 언더 스코어
 
 #### CasCadeType.ALL을 통한 영속 전파로 일괄 등록
 주문(Order)을 하나 등록하면 주문아이템(OrderItem) 3개가 있을 때 CasCadeType.ALL로 설정을 하면
