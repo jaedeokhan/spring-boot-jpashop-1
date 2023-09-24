@@ -37,7 +37,7 @@ public class Order {
     private LocalDateTime orderDate;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status; // 주문상태 [ORDER, CANCLE)
+    private OrderStatus status; // 주문상태 [ORDER, CANCEL)
 
     //== 연관관계 편의 메서드==//
     public void setMember(Member member) {
@@ -76,7 +76,7 @@ public class Order {
             throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능합니다.");
         }
 
-        this.setStatus(OrderStatus.CANCLE);
+        this.setStatus(OrderStatus.CANCEL);
         orderItems.forEach(OrderItem::cancel);
     }
 

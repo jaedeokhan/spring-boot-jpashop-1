@@ -40,7 +40,7 @@ class MemberServiceTest {
 
         // then
 //        em.flush(); // flush를 하면 DB에 쿼리가 강제로 나간다. 영속성 컨텍스트에서 DB에 쿼리를 날린다.
-        assertEquals(member, memberRepository.findMember(savedId));
+        assertEquals(member, memberRepository.findOne(savedId));
     }
 
     @Test
